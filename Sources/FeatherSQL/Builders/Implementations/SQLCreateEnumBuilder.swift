@@ -1,0 +1,51 @@
+/// Builds ``SQLCreateEnum`` queries.
+public struct SQLCreateEnumBuilder: SQLQueryBuilder {
+    /// ``SQLCreateEnum`` query being built.
+    public var createEnum: SQLCreateEnum
+
+    // See `SQLQueryBuilder.builder`.
+    public var builder: SQLBuilder
+
+    // See `SQLQueryBuilder.query`.
+    @inlinable
+    public var query: any SQLExpression {
+        self.createEnum
+    }
+
+    /// Create a new ``SQLCreateEnumBuilder``.
+    @usableFromInline
+    init(name: any SQLExpression, on builder: SQLBuilder) {
+        self.createEnum = .init(name: name, values: [])
+        self.builder = builder
+    }
+
+    /// Add an enum case to the built type.
+    @inlinable
+    @discardableResult
+    public func value(_ value: String) -> Self {
+        let copy = self
+        return copy.value(SQLLiteral.string(value))
+    }
+    /// Add a enum case to the built type.
+    @inlinable
+    @discardableResult
+    public func value(_ value: any SQLExpression) -> Self {
+        var copy = self
+        copy.createEnum.values.append(value)
+        return copy
+    }
+}
+
+extension SQLBuilder {
+    /// Create a new ``SQLCreateEnumBuilder``.
+    @inlinable
+    public func create(enum name: String) -> SQLCreateEnumBuilder {
+        self.create(enum: SQLIdentifier(name))
+    }
+
+    /// Create a new ``SQLCreateEnumBuilder``.
+    @inlinable
+    public func create(enum name: any SQLExpression) -> SQLCreateEnumBuilder {
+        .init(name: name, on: self)
+    }
+}
